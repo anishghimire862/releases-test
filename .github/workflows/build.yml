@@ -15,7 +15,10 @@ jobs:
           Move-Item -Path "ollama\assets\ollama.exe" -Destination "backend\assets\binaries\msty-local-darwin"
 
           Invoke-WebRequest -Uri "https://github.com/ollama/ollama/releases/latest/download/ollama-windows-amd64.zip" -OutFile "ollama.zip" -TimeoutSec 30 -MaximumRetryCount 3
-          powershell -command "Expand-Archive -Path ollama.zip -DestinationPath ."
 
-          Get-ChildItem -Force | Sort-Object LastWriteTime -Descending
+          New-Item -ItemType Directory -Path ollama-windows -Force
+          powershell -command "Expand-Archive -Path ollama.zip -DestinationPath ollama-windows"
+          Move-Item -Path "ollama-windows\lib" -Destination "backend\assets\binaries\lib"
+
+          Get-ChildItem -Path "backend\assets\binaries\lib" -Force | Sort-Object LastWriteTime -Descending
         
