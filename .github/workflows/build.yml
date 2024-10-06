@@ -7,7 +7,13 @@ on:
 jobs:
   build-windows:
     runs-on: windows-latest
-    steps:      
+    steps:
+      - name: Install GitHub CLI
+        run: |
+          Invoke-WebRequest -Uri "https://github.com/cli/cli/releases/latest/download/gh_$(Invoke-RestMethod -Uri 'https://api.github.com/repos/cli/cli/releases/latest' | ConvertFrom-Json).msi" -OutFile "gh-installer.msi"
+          Start-Process "msiexec.exe" -ArgumentList "/i gh-installer.msi /quiet /norestart" -NoNewWindow -Wait
+          gh --version
+          
       - name: Create binaries directory
         run: |
           mkdir backend\assets\binaries
