@@ -1,13 +1,14 @@
 name: CI
 on:
   push:
-    branches: master
+    branches: 
+      - master
 
 jobs:
   build-windows:
     runs-on: windows-latest
-      steps:
-        - name: Create binaries directory
+    steps:      
+      - name: Create binaries directory
         run: |
           mkdir backend\assets\binaries
           git clone https://github.com/cloudstack-llc/ollama.git
