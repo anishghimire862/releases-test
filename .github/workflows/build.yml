@@ -1,0 +1,20 @@
+name: CI
+on:
+  push:
+    branches: master
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+      steps:
+        - name: Create binaries directory
+        run: |
+          mkdir backend\assets\binaries
+          git clone https://github.com/cloudstack-llc/ollama.git
+          Move-Item -Path "ollama\assets\ollama.exe" -Destination "backend\assets\binaries\msty-local-darwin"
+
+          Invoke-WebRequest -Uri "https://github.com/ollama/ollama/releases/latest/download/ollama-windows-amd64.zip" -OutFile "ollama.zip" -TimeoutSec 30 -MaximumRetryCount 3
+          powershell -command "Expand-Archive -Path ollama.zip -DestinationPath ."
+
+          Get-ChildItem -Force | Sort-Object LastWriteTime -Descending
+        
