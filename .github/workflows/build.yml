@@ -8,6 +8,8 @@ jobs:
   build-windows:
     runs-on: windows-latest
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
       - name: Install GitHub CLI
         run: |
           choco install gh -y
