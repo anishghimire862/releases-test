@@ -20,7 +20,7 @@ jobs:
         run: echo "This is a dummy executable file." > release/win/1.1.1/Msty.exe
 
       - name: Upload Release Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: Msty
           path: release/win/1.1.1/Msty.exe
