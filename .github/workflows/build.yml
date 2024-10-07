@@ -40,6 +40,6 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: 'v1.1.1'
-          files: release/win/1.1.1/Msty.exe
+          files: release/win/1.1.1\Msty.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
