@@ -15,9 +15,7 @@ jobs:
 
       - name: Set RELEASE_PATH for win-auto
         run: |
-          "RELEASE_PATH=./release/1.1.1/win/auto" | Out-File -Append -FilePath $env:GITHUB_ENV
-          New-Item -Path "${{ env.RELEASE_PATH }}" -ItemType Directory -Force
-          New-Item -Path "${{ env.RELEASE_PATH }}"/Msty_x64.exe -ItemType File -Force
+          New-Item -Path ./release/1.1.1/win/auto/Msty_x64.exe -ItemType File -Force
 
       - name: Upload Windows-auto files
         run: |
