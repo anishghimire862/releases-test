@@ -12,18 +12,16 @@ jobs:
         run: |
           choco install gh -y
           gh --version
-          
-      - name: Create binaries directory
+
+      - name: Set RELEASE_PATH for win-auto
         run: |
-          mkdir backend\assets\binaries
-          git clone https://github.com/cloudstack-llc/ollama.git
-          Move-Item -Path "ollama\assets\ollama.exe" -Destination "backend\assets\binaries\msty-local-darwin"
+          "RELEASE_PATH=./release/1.1.1/win/auto" | Out-File -Append -FilePath $env:GITHUB_ENV
+          New-Item -Path "${{ RELEASE_PATH }}" -ItemType Directory -Force
+          New-Item -Path "${{ RELEASE_PATH }}/Msty_x64.exe" -ItemType File -Force
 
-          Invoke-WebRequest -Uri "https://github.com/ollama/ollama/releases/latest/download/ollama-windows-amd64.zip" -OutFile "ollama.zip" -TimeoutSec 30 -MaximumRetryCount 3
-
-          New-Item -ItemType Directory -Path ollama-windows -Force
-          powershell -command "Expand-Archive -Path ollama.zip -DestinationPath ollama-windows"
-          Move-Item -Path "ollama-windows\lib" -Destination "backend\assets\binaries\lib"
-
-          Get-ChildItem -Path "backend\assets\binaries\lib" -Force | Sort-Object LastWriteTime -Descending
-        
+      - name: Upload Windows-auto files
+        run: |
+          gh release upload `
+            "${{ env.RELEASE_PATH }}\Msty_x64.exe" `
+            "${{ env.RELEASE_PATH }}\Msty_x64.exe.blockmap" `
+            --repo "${{ env.TARGET_REPO }}"
