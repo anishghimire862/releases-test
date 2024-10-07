@@ -41,5 +41,5 @@ jobs:
         with:
           tag_name: 'v1.1.1'
           repository: anishghimire862/releases-test-artifacts
-          files: release/win/1.1.1/Msty.exe
+          files: release/win/1.1.1
           token: ${{ secrets.TARGET_REPO }}
