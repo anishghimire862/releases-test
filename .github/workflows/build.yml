@@ -42,6 +42,6 @@ jobs:
           tag_name: 'v1.1.1'
           repository: anishghimire862/releases-test-artifacts
           files: |
-            release/win/1.1.1#auto/Msty.exe
-            release/win/1.1.1#cpu/Msty.exe
+            release/win/1.1.1/Msty.exe#auto/Msty.exe
+            release/win/1.1.1/Msty.exe#cpu/Msty.exe
           token: ${{ secrets.TARGET_REPO }}
