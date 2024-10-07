@@ -18,6 +18,8 @@ jobs:
           New-Item -Path ./release/1.1.1/win/auto/Msty_x64.exe -ItemType File -Force
 
       - name: Upload Windows-auto files
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           gh release create 1.1.1 `
           --title 1.1.1 `
