@@ -10,7 +10,7 @@ jobs:
     steps:
       - name: Install GitHub CLI
         run: |
-          winget install --id GitHub.cli -e --source winget
+          choco install gh -y
           gh --version
           
       - name: Create binaries directory
