@@ -40,6 +40,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: 'v1.1.1'
+          repository: anishghimire862/releases-test
           files: release/win/1.1.1\Msty.exe
+          token: ${{ secrets.TARGET_REPO }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
