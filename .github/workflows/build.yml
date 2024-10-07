@@ -15,9 +15,11 @@ jobs:
           choco install gh -y
           gh --version
 
-      - name: Set RELEASE_PATH for win-auto
+      - name: Prepare Release Files
         run: |
-          New-Item -Path ./release/1.1.1/win/auto/Msty_x64.exe -ItemType File -Force
+          $RELEASE_PATH = "./release/1.1.1/win/auto"
+          New-Item -Path $RELEASE_PATH -ItemType Directory -Force
+          New-Item -Path "$RELEASE_PATH/Msty_x64.exe" -ItemType File -Force
 
       - name: Upload Windows-auto files
         env:
