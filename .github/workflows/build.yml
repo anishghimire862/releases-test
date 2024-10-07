@@ -10,15 +10,10 @@ jobs:
     steps:
       - name: Install GitHub CLI
         run: |
-          $response = Invoke-RestMethod -Uri 'https://api.github.com/repos/cli/cli/releases/latest'
-          if ($response -ne $null) {
-              $downloadUrl = "https://github.com/cli/cli/releases/latest/download/gh_$($response.tag_name).msi"
-              Invoke-WebRequest -Uri $downloadUrl -OutFile "gh-installer.msi"
-              Start-Process "msiexec.exe" -ArgumentList "/i gh-installer.msi /quiet /norestart" -NoNewWindow -Wait
-              gh --version
-          } else {
-              Write-Error "Failed to retrieve the latest GitHub CLI release information."
-          }
+          Invoke-WebRequest -Uri "https://github.com/cli/cli/releases/latest/download/gh_2.37.0_windows_amd64.msi" -OutFile "gh-installer.msi"
+          Start-Process msiexec.exe -ArgumentList "/i gh-installer.msi /quiet /norestart" -NoNewWindow -Wait
+          Remove-Item -Path "gh-installer.msi"
+          gh --version
           
       - name: Create binaries directory
         run: |
