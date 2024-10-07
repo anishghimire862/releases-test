@@ -21,7 +21,7 @@ jobs:
 
       - name: Upload Windows-auto files
         run: |
-          gh release upload `
-            "${{ env.RELEASE_PATH }}\Msty_x64.exe" `
-            "${{ env.RELEASE_PATH }}\Msty_x64.exe.blockmap" `
-            --repo "${{ env.TARGET_REPO }}"
+          gh release create 1.1.1 `
+          --title 1.1.1 `
+          --notes "Automated release from GitHub Actions" `
+          "./release/1.1.1/win/auto/Msty_x64.exe"
