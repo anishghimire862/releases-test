@@ -10,9 +10,7 @@ jobs:
     steps:
       - name: Install GitHub CLI
         run: |
-          Invoke-WebRequest -Uri "https://github.com/cli/cli/releases/latest/download/gh_2.37.0_windows_amd64.msi" -OutFile "gh-installer.msi"
-          Start-Process msiexec.exe -ArgumentList "/i gh-installer.msi /quiet /norestart" -NoNewWindow -Wait
-          Remove-Item -Path "gh-installer.msi"
+          winget install --id GitHub.cli -e --source winget
           gh --version
           
       - name: Create binaries directory
