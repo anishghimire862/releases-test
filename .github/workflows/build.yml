@@ -21,8 +21,15 @@ jobs:
           echo "TAG_VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Build
+        if: startsWith(github.ref, 'refs/heads/rel/')
         run: |
-          echo "Building macOS with version: ${{ env.TAG_VERSION }}"
+          echo "Building macOS with version: ${{ env.TAG_VERSION }}. Beta build.."
+
+      - name: Build
+        if: startsWith(github.ref, 'refs/heads/master/')
+        run: |
+          echo "Building macOS with version: ${{ env.TAG_VERSION }}. Prod build.."
+
 
   # build-linux:
   #   if: startsWith(github.ref, 'refs/heads/rel/linux') || github.ref == 'refs/heads/master'
