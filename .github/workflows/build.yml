@@ -63,34 +63,38 @@ jobs:
 
     if: "!contains(github.event.head_commit.message, '[skip-win]')"
     steps:
-      - name: Check skip condition for win-auto
-        if: matrix.build-config == 'win-auto' && contains(github.event.head_commit.message, '[skip-win-auto]')
+      - name: Check commit message
         run: |
-          echo "Skipping win-auto build due to '[skip-win-auto]' in commit message."
-          exit 0
+          commitMessage="${{ github.event.head_commit.message }}"
+          echo "Commit message: $commitMessage"
 
-      - name: Check skip condition for win-cpu
-        if: matrix.build-config == 'win-cpu' && contains(github.event.head_commit.message, '[skip-win-cpu]')
-        run: |
-          echo "Skipping win-cpu build due to '[skip-win-cpu]' in commit message."
-          exit 0
+          if [[ "${{ matrix.build-config }}" == "win-auto" && "$commitMessage" == *"[skip-win-auto]"* ]]; then
+            echo "Skipping win-auto build due to '[skip-win-auto]' in commit message."
+            echo "skip=true" >> $GITHUB_ENV
+          elif [[ "${{ matrix.build-config }}" == "win-cpu" && "$commitMessage" == *"[skip-win-cpu]"* ]]; then
+            echo "Skipping win-cpu build due to '[skip-win-cpu]' in commit message."
+            echo "SKIP=true" >> $env:GITHUB_ENV
+          else
+            echo "SKIP=false" >> $env:GITHUB_ENV
+          fi
 
       - name: Check out Git repository
+        if: ${{ env.SKIP != true }}
         uses: actions/checkout@v3
 
       - name: Extract version from package.json
-        id: extract_version
+        if: ${{ env.SKIP != true }}
         run: |
           $VERSION = (Get-Content package.json | ConvertFrom-Json).version
           echo "TAG_VERSION=$VERSION" >> $env:GITHUB_ENV
 
       - name: Build for rel
-        if: startsWith(github.ref, 'refs/heads/rel/')
+        if: ${{ env.SKIP != true }} && startsWith(github.ref, 'refs/heads/rel/')
         run: |
           echo "Building Windows with version: ${{ env.TAG_VERSION }}. Beta build.."
 
       - name: Build for master
-        if: github.ref == 'refs/heads/master'
+        if: ${{ env.SKIP != true }} && github.ref == 'refs/heads/master'
         run: |
           echo "Building Windows with version: ${{ env.TAG_VERSION }}. Prod build.."
 
