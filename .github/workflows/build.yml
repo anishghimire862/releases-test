@@ -41,7 +41,7 @@ jobs:
         id: extract_version
         run: |
           VERSION=$(jq -r .version package.json)
-          echo "TAG_VERSION=$VERSION" >> $env:GITHUB_ENV
+          echo "TAG_VERSION=$VERSION" >> $GITHUB_ENV
             
       - name: Build for rel
         if: startsWith(github.ref, 'refs/heads/rel/')
@@ -56,10 +56,7 @@ jobs:
 
   build-windows:
     runs-on: windows-latest
-    strategy:
-      matrix:
-        build-config: [ win-auto, win-cpu ]
-
+    
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v3
