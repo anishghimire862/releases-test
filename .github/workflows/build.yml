@@ -76,12 +76,12 @@ jobs:
           echo "R2_DESTINATION_DIR=aurum/${{ env.TAG_VERSION }}/$TIMESTAMP/linux" >> $GITHUB_ENV
             
       - name: Build for rel
-        if: startsWith(github.ref, 'refs/heads/rel/')
+        if: ${{ env.SKIP != 'true' && startsWith(github.ref, 'refs/heads/rel/') }}
         run: |
           echo "Building Linux with version: ${{ env.TAG_VERSION }}. Beta build.. ${{ env.R2_DESTINATION_DIR }}"
 
       - name: Build for master
-        if: github.ref == 'refs/heads/master'
+        if: ${{ env.SKIP != 'true' && github.ref == 'refs/heads/master' }}
         run: |
           echo "Building Linux with version: ${{ env.TAG_VERSION }}. Prod build.. ${{ env.R2_DESTINATION_DIR }}"
 
