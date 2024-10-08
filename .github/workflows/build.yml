@@ -22,7 +22,7 @@ jobs:
 
       - name: Build
         run: |
-          echo "Building macOS with version: $TAG_VERSION"
+          echo "Building macOS with version: ${{ env.TAG_VERSION }}"
 
   # build-linux:
   #   if: startsWith(github.ref, 'refs/heads/rel/linux') || github.ref == 'refs/heads/master'
