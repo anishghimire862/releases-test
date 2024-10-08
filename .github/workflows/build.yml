@@ -67,12 +67,12 @@ jobs:
         run: |
           $commitMessage = "${{ github.event.head_commit.message }}"
 
-          if ("${{ matrix.build-config }}" -eq 'win-auto' -and $commitMessage -like '*\[skip-win-auto\]*') {
+          if ("${{ matrix.build-config }}" -eq 'win-auto' -and $commitMessage -like '*`[skip-win-auto`]*') {
             Write-Host "Skipping win-auto build due to '[skip-win-auto]' in commit message."
             return
           }
 
-          if ("${{ matrix.build-config }}" -eq 'win-cpu' -and $commitMessage -like '*\[skip-win-cpu\]*') {
+          if ("${{ matrix.build-config }}" -eq 'win-cpu' -and $commitMessage -like '*`[skip-win-cpu`]*') {
             Write-Host "Skipping win-cpu build due to '[skip-win-cpu]' in commit message."
             return
           }
