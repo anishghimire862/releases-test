@@ -61,10 +61,20 @@ jobs:
         build-config: [ win-auto, win-cpu ]
 
 
-    if: |
-      matrix.build-config != 'win-auto' || !contains(github.event.head_commit.message, '[skip-win-auto]') &&
-      matrix.build-config != 'win-cpu' || !contains(github.event.head_commit.message, '[skip-win-cpu]')
+    if: "!contains(github.event.head_commit.message, '[skip-win]')"
     steps:
+      - name: Check skip condition for win-auto
+        if: matrix.build-config == 'win-auto' && contains(github.event.head_commit.message, '[skip-win-auto]')
+        run: |
+          echo "Skipping win-auto build due to '[skip-win-auto]' in commit message."
+          exit 0
+
+      - name: Check skip condition for win-cpu
+        if: matrix.build-config == 'win-cpu' && contains(github.event.head_commit.message, '[skip-win-cpu]')
+        run: |
+          echo "Skipping win-cpu build due to '[skip-win-cpu]' in commit message."
+          exit 0
+
       - name: Check out Git repository
         uses: actions/checkout@v3
 
