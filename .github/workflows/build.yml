@@ -30,45 +30,53 @@ jobs:
           echo "Building macOS with version: ${{ env.TAG_VERSION }}. Prod build.."
 
 
-  # build-linux:
-  #   if: startsWith(github.ref, 'refs/heads/rel/linux') || github.ref == 'refs/heads/master'
-  #   runs-on: ubuntu-latest
+  build-linux:
+    runs-on: ubuntu-latest
 
-  #   steps:
-  #     - name: Check out Git repository
-  #       uses: actions/checkout@v3
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v3
 
-  #     - name: Extract version from package.json
-  #       id: extract_version
-  #       run: |
-  #         VERSION=$(jq -r .version package.json)
-  #         echo "VERSION=$VERSION" >> $GITHUB_ENV
+      - name: Extract version from package.json
+        id: extract_version
+        run: |
+          VERSION=$(jq -r .version package.json)
+          echo "TAG_VERSION=$VERSION" >> $env:GITHUB_ENV
+            
+      - name: Build for rel
+        if: startsWith(github.ref, 'refs/heads/rel/')
+        run: |
+          echo "Building Linux with version: ${{ env.TAG_VERSION }}. Beta build.."
 
-  #     - name: Set ENV for Linux
-  #       run: |
-  #         echo "TAG_VERSION=${{ env.VERSION }}" >> $GITHUB_ENV
-  #         echo "Building Linux with version: $TAG_VERSION"
+      - name: Build for master
+        if: startsWith(github.ref, 'refs/heads/master')
+        run: |
+          echo "Building Linux with version: ${{ env.TAG_VERSION }}. Prod build.."
 
-  # build-windows:
-  #   if: startsWith(github.ref, 'refs/heads/rel/windows/') || github.ref == 'refs/heads/master'
-  #   runs-on: windows-latest
-  #   strategy:
-  #     matrix:
-  #       build-config: [ win-auto, win-cpu ]
 
-  #   steps:
-  #     - name: Check out Git repository
-  #       uses: actions/checkout@v3
+  build-windows:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        build-config: [ win-auto, win-cpu ]
 
-  #     - name: Extract version from package.json
-  #       id: extract_version
-  #       shell: pwsh
-  #       run: |
-  #         $VERSION = (Get-Content package.json | ConvertFrom-Json).version
-  #         echo "VERSION=$VERSION" >> $env:GITHUB_ENV
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v3
 
-  #     - name: Set ENV for Windows
-  #       shell: pwsh
-  #       run: |
-  #         echo "TAG_VERSION=$env:VERSION" >> $env:GITHUB_ENV
-  #         echo "Building Windows with version: $TAG_VERSION"
+      - name: Extract version from package.json
+        id: extract_version
+        run: |
+          $VERSION = (Get-Content package.json | ConvertFrom-Json).version
+          echo "TAG_VERSION=$VERSION" >> $env:GITHUB_ENV
+
+      - name: Build for rel
+        if: startsWith(github.ref, 'refs/heads/rel/')
+        run: |
+          echo "Building Windows with version: ${{ env.TAG_VERSION }}. Beta build.."
+
+      - name: Build for master
+        if: startsWith(github.ref, 'refs/heads/master')
+        run: |
+          echo "Building Windows with version: ${{ env.TAG_VERSION }}. Prod build.."
+
