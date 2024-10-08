@@ -68,14 +68,12 @@ jobs:
           commitMessage="${{ github.event.head_commit.message }}"
           echo "Commit message: $commitMessage"
 
-          if [[ "${{ matrix.build-config }}" == "win-auto" && "$commitMessage" == *"[skip-win-auto]"* ]]; then
-            echo "Skipping win-auto build due to '[skip-win-auto]' in commit message."
+          if [[ "$commitMessage" == *"[skip-win-auto]"* && "${{ matrix.build-config }}" == "win-auto" ]] || \
+             [[ "$commitMessage" == *"[skip-win-cpu]"* && "${{ matrix.build-config }}" == "win-cpu" ]]; then
+            echo "Skipping ${{ matrix.build-config }} build due to skip directive in commit message."
             echo "skip=true" >> $GITHUB_ENV
-          elif [[ "${{ matrix.build-config }}" == "win-cpu" && "$commitMessage" == *"[skip-win-cpu]"* ]]; then
-            echo "Skipping win-cpu build due to '[skip-win-cpu]' in commit message."
-            echo "SKIP=true" >> $env:GITHUB_ENV
           else
-            echo "SKIP=false" >> $env:GITHUB_ENV
+            echo "skip=false" >> $GITHUB_ENV
           fi
 
       - name: Check out Git repository
