@@ -56,9 +56,27 @@ jobs:
 
   build-windows:
     runs-on: windows-latest
+    strategy:
+      matrix:
+        build-config: [ win-auto, win-cpu ]
+
 
     if: "!contains(github.event.head_commit.message, '[skip-win]')"
     steps:
+      - name: Check skip condition
+        run: |
+          $commitMessage = "${{ github.event.head_commit.message }}"
+
+          if (${{ matrix.build-config }} -eq 'win-auto' -and $commitMessage -like '*[skip-win-auto]*') {
+            Write-Host "Skipping win-auto build due to '[skip-win-auto]' in commit message."
+            return
+          }
+
+          if (${{ matrix.build-config }} -eq 'win-cpu' -and $commitMessage -like '*[skip-win-cpu]*') {
+            Write-Host "Skipping win-cpu build due to '[skip-win-cpu]' in commit message."
+            return
+          }
+
       - name: Check out Git repository
         uses: actions/checkout@v3
 
