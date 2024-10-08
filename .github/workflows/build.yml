@@ -6,6 +6,14 @@ on:
       - master
 
 jobs:
+  build-macos:
+    runs-on: macos-latest
+
+    steps:
+      - name: Check Xcode
+        run: |
+          echo $(xcode-select --print-path)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk
+          ls -alt $(xcode-select --print-path)/Platforms/MacOSX.platform/Developer/SDKs/
   build:
     runs-on: windows-latest
 
