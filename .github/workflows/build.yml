@@ -1,51 +1,26 @@
-name: Windows Build and Release
-
+name: Build
 on:
   push:
+    tags:
+      - 'v*'
     branches:
-      - master
+      - 'rel/**'
 
 jobs:
   build-macos:
+    if: startsWith(github.ref, 'refs/heads/rel/mac/') || startsWith(github.ref, 'refs/tags/v')
     runs-on: macos-latest
-
     steps:
-      - name: Check Xcode
+      - name: Check out Git repository
+        uses: actions/checkout@v3
+
+      - name: Set ENV for macOS
         run: |
-          echo $(xcode-select --print-path)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk
-          ls -alt $(xcode-select --print-path)/Platforms/MacOSX.platform/Developer/SDKs/
-  build:
-    runs-on: windows-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Create directory
-        run: mkdir -p release/win/1.1.1
-
-      - name: Create dummy file
-        run: echo "This is a dummy executable file." > release/win/1.1.1/Msty.exe
-
-      - name: Upload Release Artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: Msty
-          path: release/win/1.1.1/Msty.exe
-
-      - name: Prepare files for upload
+          TAG_VERSION=${{ github.ref }}
+          TAG_VERSION=${TAG_VERSION#refs/tags/}
+          TAG_VERSION=${TAG_VERSION#v}
+          echo "TAG_VERSION=$TAG_VERSION" >> $GITHUB_ENV
+      
+      - name: Run
         run: |
-          mkdir temp_upload
-          copy release/win/1.1.1/Msty.exe temp_upload\
-
-
-      - name: Upload artifacts
-        uses: ryand56/r2-upload-action@latest
-        with:
-          r2-account-id: ${{ secrets.R2_ACCOUNT_ID }}
-          r2-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
-          r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          r2-bucket: ${{ secrets.R2_BUCKET }}
-          source-dir: temp_upload/
-          destination-dir: 1.1.2/win/auto
-          keep-file-fresh: true
+          echo $TAGVERSION
