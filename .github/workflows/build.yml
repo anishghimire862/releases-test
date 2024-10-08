@@ -7,7 +7,6 @@ on:
 
 jobs:
   build-macos:
-    if: startsWith(github.ref, 'refs/heads/rel/mac/') || github.ref == 'refs/heads/master'
     runs-on: macos-latest
 
     steps:
