@@ -146,3 +146,8 @@ jobs:
         run: |
           echo "Building Windows with version: ${{ env.TAG_VERSION }}. Prod build.."
 
+      - name: Set RELEASE_PATH for win-cpu
+        run: |
+          "RELEASE_PATH=testing" | Out-File -Append -FilePath $env:GITHUB_ENV
+
+
