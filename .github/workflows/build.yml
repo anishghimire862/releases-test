@@ -9,6 +9,7 @@ jobs:
   build-macos:
     runs-on: macos-latest
 
+    if: "!contains(github.event.head_commit.message, '[skip-macos]')"
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v3
@@ -19,16 +20,31 @@ jobs:
           VERSION=$(jq -r .version package.json)
           echo "TAG_VERSION=$VERSION" >> $GITHUB_ENV
 
+      - name: Set R2 destination directory for production release
+        if: github.ref == 'refs/heads/master'
+        run: |
+          echo "R2_DESTINATION_DIR=prod/${{ env.TAG_VERSION }}/mac" >> $GITHUB_ENV
+      - name: Set R2 destination directory for beta release
+        if: startsWith(github.ref, 'refs/heads/rel/')
+        run: |
+          TIMESTAMP=$(date +%Y%m%d%H%M%S)
+          echo "R2_DESTINATION_DIR=aurum/${{ env.TAG_VERSION }}/$TIMESTAMP/mac" >> $GITHUB_ENV
+
+      - name: Download Msty Local Darwin
+        run:  |
+          mkdir -p backend/assets/binaries
+          wget --tries=3 --timeout=30 https://github.com/ollama/ollama/releases/latest/download/ollama-darwin -O msty-local-darwin
+          mv msty-local-darwin backend/assets/binaries
+
       - name: Build for rel
         if: startsWith(github.ref, 'refs/heads/rel/')
         run: |
-          echo "Building macOS with version: ${{ env.TAG_VERSION }}. Beta build.."
+          echo "Building macOS with version: ${{ env.TAG_VERSION }}. Beta build.. ${{ env.R2_DESTINATION_DIR }}"
 
       - name: Build for master
         if: github.ref == 'refs/heads/master'
         run: |
-          echo "Building macOS with version: ${{ env.TAG_VERSION }}. Prod build.."
-
+          echo "Building macOS with version: ${{ env.TAG_VERSION }}. Prod build.. ${{ env.R2_DESTINATION_DIR }}"
 
   build-linux:
     runs-on: ubuntu-latest
