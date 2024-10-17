@@ -9,145 +9,30 @@ jobs:
   build-macos:
     runs-on: macos-latest
 
-    if: "!contains(github.event.head_commit.message, '[skip-macos]')"
     steps:
-      - name: Check out Git repository
-        uses: actions/checkout@v3
+    - name: Pack LanceDB
+      run: |
+          mkdir -p backend/assets/binaries/darwin/@lancedb
 
-      - name: Extract version from package.json
-        id: extract_version
-        run: |
-          VERSION=$(jq -r .version package.json)
-          echo "TAG_VERSION=$VERSION" >> $GITHUB_ENV
+          LANCEDB_X64="@lancedb/vectordb-darwin-x64"
+          LANCEDB_ARM64="@lancedb/vectordb-darwin-arm64"
 
-      - name: Set R2 destination directory for production release
-        if: github.ref == 'refs/heads/master'
-        run: |
-          echo "R2_DESTINATION_DIR=prod/${{ env.TAG_VERSION }}/mac" >> $GITHUB_ENV
-      - name: Set R2 destination directory for beta release
-        if: startsWith(github.ref, 'refs/heads/rel/')
-        run: |
-          TIMESTAMP=$(date +%Y%m%d%H%M%S)
-          echo "R2_DESTINATION_DIR=aurum/${{ env.TAG_VERSION }}/$TIMESTAMP/mac" >> $GITHUB_ENV
+          VERSION_X64=$(npm show $LANCEDB_X64 version)
+          VERSION_ARM64=$(npm show $LANCEDB_ARM64 version)
 
-      - name: Download Msty Local Darwin
-        run:  |
-          mkdir -p backend/assets/binaries
-          wget --tries=3 --timeout=30 https://github.com/ollama/ollama/releases/latest/download/ollama-darwin -O msty-local-darwin
-          mv msty-local-darwin backend/assets/binaries
+          npm pack $LANCEDB_X64
+          npm pack $LANCEDB_ARM64
 
-      - name: Build for rel
-        if: startsWith(github.ref, 'refs/heads/rel/')
-        run: |
-          echo "Building macOS with version: ${{ env.TAG_VERSION }}. Beta build.. ${{ env.R2_DESTINATION_DIR }}"
+          npm pack $LANCEDB_X64
+          npm pack $LANCEDB_ARM64
 
-      - name: Build for master
-        if: github.ref == 'refs/heads/master'
-        run: |
-          echo "Building macOS with version: ${{ env.TAG_VERSION }}. Prod build.. ${{ env.R2_DESTINATION_DIR }}"
+          mkdir vectordb-darwin-x64
+          tar -xzf lancedb-vectordb-darwin-x64-$VERSION_X64.tgz -C vectordb-darwin-x64
 
-  build-linux:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        build-config: [ lin-amd64, lin-rocm ]
+          mkdir vectordb-darwin-arm64
+          tar -xzf lancedb-vectordb-darwin-arm64-$VERSION_ARM64.tgz -C vectordb-darwin-arm64
 
-    if: "!contains(github.event.head_commit.message, '[skip-linux]')"
-    steps:
-      - name: Check skip condition
-        run: |
-          commitMessage="${{ github.event.head_commit.message }}"
-          echo "Commit message: $commitMessage"
+          mv vectordb-darwin-x64 backend/assets/binaries/darwin/@lancedb
+          mv vectordb-darwin-arm64 backend/assets/binaries/darwin/@lancedb
 
-          if [[ "${{ matrix.build-config }}" == "lin-amd64" && "$commitMessage" == *"[skip-lin-amd64]"* ]]; then
-            echo "Skipping lin-amd64 build due to '[skip-lin-amd64]' in commit message."
-            echo "SKIP=true" >> $GITHUB_ENV
-          elif [[ "${{ matrix.build-config }}" == "lin-rocm" && "$commitMessage" == *"[skip-lin-rocm]"* ]]; then
-            echo "Skipping lin-rocm build due to '[skip-lin-rocm]' in commit message."
-            echo "SKIP=true" >> $GITHUB_ENV
-          else
-            echo "SKIP=false" >> $GITHUB_ENV
-          fi
-
-      - name: Check out Git repository
-        if: ${{ env.SKIP != 'true' }}
-        uses: actions/checkout@v3
-
-      - name: Extract version from package.json
-        if: ${{ env.SKIP != 'true' }}
-        id: extract_version
-        run: |
-          VERSION=$(jq -r .version package.json)
-          echo "TAG_VERSION=$VERSION" >> $GITHUB_ENV
-
-      - name: Set R2 destination directory for production release
-        if: ${{ env.SKIP != 'true' && github.ref == 'refs/heads/master' }}
-        run: |
-          echo "R2_DESTINATION_DIR=aurum/prod/${{ env.TAG_VERSION }}/linux" >> $GITHUB_ENV
-
-      - name: Set R2 destination directory for beta release
-        if: ${{ env.SKIP != 'true' && startsWith(github.ref, 'refs/heads/rel/') }}
-        run: |
-          TIMESTAMP=$(date +%Y%m%d%H%M%S)
-          echo "R2_DESTINATION_DIR=aurum/${{ env.TAG_VERSION }}/$TIMESTAMP/linux" >> $GITHUB_ENV
-            
-      - name: Build for rel
-        if: ${{ env.SKIP != 'true' && startsWith(github.ref, 'refs/heads/rel/') }}
-        run: |
-          echo "Building Linux with version: ${{ env.TAG_VERSION }}. Beta build.. ${{ env.R2_DESTINATION_DIR }}"
-
-      - name: Build for master
-        if: ${{ env.SKIP != 'true' && github.ref == 'refs/heads/master' }}
-        run: |
-          echo "Building Linux with version: ${{ env.TAG_VERSION }}. Prod build.. ${{ env.R2_DESTINATION_DIR }}"
-
-
-  build-windows:
-    runs-on: windows-latest
-    strategy:
-      matrix:
-        build-config: [ win-auto, win-cpu ]
-
-
-    if: "!contains(github.event.head_commit.message, '[skip-win]')"
-    steps:
-      - name: Check commit message
-        run: |
-          $commitMessage = "${{ github.event.head_commit.message }}"
-          Write-Host "Commit message: $commitMessage"
-
-          if ($commitMessage -like '*`[skip-win-auto`]*' -and "${{ matrix.build-config }}" -eq 'win-auto') {
-            Write-Host "Skipping win-auto build due to '[skip-win-auto]' in commit message."
-            echo "SKIP=true" >> $env:GITHUB_ENV
-          } elseif ($commitMessage -like '*`[skip-win-cpu`]*' -and "${{ matrix.build-config }}" -eq 'win-cpu') {
-            Write-Host "Skipping win-cpu build due to '[skip-win-cpu]' in commit message."
-            echo "SKIP=true" >> $env:GITHUB_ENV
-          } else {
-            echo "SKIP=false" >> $env:GITHUB_ENV
-          }
-
-      - name: Check out Git repository
-        if: ${{ env.SKIP != 'true' }}
-        uses: actions/checkout@v3
-
-      - name: Extract version from package.json
-        if: ${{ env.SKIP != 'true' }}
-        run: |
-          $VERSION = (Get-Content package.json | ConvertFrom-Json).version
-          echo "TAG_VERSION=$VERSION" >> $env:GITHUB_ENV
-
-      - name: Build for rel
-        if: ${{ env.SKIP != 'true' && startsWith(github.ref, 'refs/heads/rel/') }}
-        run: |
-          echo "Building Windows with version: ${{ env.TAG_VERSION }}. Beta build.."
-
-      - name: Build for master
-        if: ${{ env.SKIP != 'true' && github.ref == 'refs/heads/master' }}
-        run: |
-          echo "Building Windows with version: ${{ env.TAG_VERSION }}. Prod build.."
-
-      - name: Set RELEASE_PATH for win-cpu
-        run: |
-          "RELEASE_PATH=testing" | Out-File -Append -FilePath $env:GITHUB_ENV
-
-
+          ls -alt backend/assets/binaries/darwin/@lancedb
