@@ -17,7 +17,7 @@ jobs:
       - name: Create files
         run: |
          mkdir temp_upload
-         touch temp_upload/file1 temp_upload/file2 temp_upload/file3
+         touch temp_upload/mac1 temp_upload/mac2 temp_upload/mac3
       
       - name: Upload artifacts
         uses: ryand56/r2-upload-action@latest
@@ -29,6 +29,52 @@ jobs:
           source-dir: temp_upload/
           destination-dir: ${{ env.R2_DESTINATION_DIR }}
           keep-file-fresh: true
-        
 
-        
+  build-linux:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        build-config: [ lin-amd64, lin-rocm ]
+
+    steps:
+    - name: Set R2 destination directory for production release
+      run: |
+        echo "R2_DESTINATION_DIR=prod/latest/linux" >> $GITHUB_ENV
+
+    - name: Create files
+      if: ${{ matrix.build-config == 'lin-amd64' }}
+      run: |
+       mkdir temp_upload
+       touch temp_upload/lin-amd64v1 temp_upload/lin-amd64v1 temp_upload/lin-amd64v1
+
+    - name: Create files
+      if: ${{ matrix.build-config == 'lin-rocm' }}
+      run: |
+       mkdir temp_upload
+       touch temp_upload/lin-rocm temp_upload/lin-rocm temp_upload/lin-rocm
+
+    - name: Upload artifacts
+      if: ${{ env.SKIP != 'true' && matrix.build-config == 'lin-amd64' }}
+      uses: ryand56/r2-upload-action@latest
+      with:
+        r2-account-id: ${{ secrets.R2_ACCOUNT_ID }}
+        r2-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
+        r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+        r2-bucket: ${{ secrets.R2_BUCKET }}
+        source-dir: temp_upload/
+        destination-dir: ${{ env.R2_DESTINATION_DIR }}/amd64
+        keep-file-fresh: true
+
+    - name: Upload artifacts
+      if: ${{ env.SKIP != 'true' && matrix.build-config == 'lin-rocm' }}
+      uses: ryand56/r2-upload-action@latest
+      with:
+        r2-account-id: ${{ secrets.R2_ACCOUNT_ID }}
+        r2-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
+        r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+        r2-bucket: ${{ secrets.R2_BUCKET }}
+        source-dir: temp_upload/
+        destination-dir: ${{ env.R2_DESTINATION_DIR }}/rocm
+        keep-file-fresh: true
+
+
