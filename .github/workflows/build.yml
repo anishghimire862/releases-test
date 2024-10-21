@@ -37,6 +37,10 @@ jobs:
         build-config: [ lin-amd64, lin-rocm ]
 
     steps:
+    - name: Sleep for 10 seconds
+      run: |
+        sleep 10  # macOS and Linux command
+
     - name: Set R2 destination directory for production release
       run: |
         echo "R2_DESTINATION_DIR=prod/latest/linux" >> $GITHUB_ENV
