@@ -10,29 +10,25 @@ jobs:
     runs-on: macos-latest
 
     steps:
-    - name: Pack LanceDB
-      run: |
-          mkdir -p backend/assets/binaries/darwin/@lancedb
+      - name: Set R2 destination directory for production release
+        run: |
+          echo "R2_DESTINATION_DIR=prod/latest/mac" >> $GITHUB_ENV
 
-          LANCEDB_X64="@lancedb/vectordb-darwin-x64"
-          LANCEDB_ARM64="@lancedb/vectordb-darwin-arm64"
+      - name: Create files
+        run: |
+         mkdir temp_upload
+         touch temp_upload/file1 temp_upload/file2 temp_upload/file3
+      
+      - name: Upload artifacts
+        uses: ryand56/r2-upload-action@latest
+        with:
+          r2-account-id: ${{ secrets.R2_ACCOUNT_ID }}
+          r2-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
+          r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          r2-bucket: ${{ secrets.R2_BUCKET }}
+          source-dir: temp_upload/
+          destination-dir: ${{ env.R2_DESTINATION_DIR }}
+          keep-file-fresh: true
+        
 
-          VERSION_X64=$(npm show $LANCEDB_X64 version)
-          VERSION_ARM64=$(npm show $LANCEDB_ARM64 version)
-
-          npm pack $LANCEDB_X64
-          npm pack $LANCEDB_ARM64
-
-          npm pack $LANCEDB_X64
-          npm pack $LANCEDB_ARM64
-
-          mkdir vectordb-darwin-x64
-          tar -xzf lancedb-vectordb-darwin-x64-$VERSION_X64.tgz -C vectordb-darwin-x64
-
-          mkdir vectordb-darwin-arm64
-          tar -xzf lancedb-vectordb-darwin-arm64-$VERSION_ARM64.tgz -C vectordb-darwin-arm64
-
-          mv vectordb-darwin-x64 backend/assets/binaries/darwin/@lancedb
-          mv vectordb-darwin-arm64 backend/assets/binaries/darwin/@lancedb
-
-          ls -alt backend/assets/binaries/darwin/@lancedb
+        
